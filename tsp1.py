@@ -31,32 +31,32 @@ from ortools.constraint_solver import pywrapcp
 # You need to import routing_enums_pb2 after pywrapcp!
 from ortools.constraint_solver import routing_enums_pb2
 
-def createAjtable():
+def createAjtable(): 
+# read nodes information and store these info in a dictionary 
     with open('test.txt','r') as infile:
-        d = [d.replace('\n','').split(' ') for d in infile.readlines()]
+        d = [d.replace('\n','').split(' ') for d in infile.readlines()] 
     ajtable = {}
     size = len(d)
-    distance_max = 1000
-    for from_node in range(size):
+    distance_max = 1000 # based on data, distance of my data is from 0 to 100, using 1000 to make sure the unconnect nodes is not selected
+    for from_node in range(size): # nested  to initialize the dictionary
       ajtable[from_node] = {}
       for to_node in range(size):
         if from_node == to_node:
           ajtable[from_node][to_node] = 0
         else:
           ajtable[from_node][to_node] = distance_max
-    for node in d:
+    for node in d: # rewrite the relationship of nodes
         i = int(node[0])
         for k in node[1:]:
             j, value = k.split(':')
             ajtable[i][int(j)] = float(value)
     return len(d), ajtable
 
-class AdjacentMatrix(object):
+class AdjacentMatrix(object): #using class to follow the or-tool instruction
   """AdjacentMatrix"""
   def __init__(self, size, ajtable):
     """Initialize adjacent matrix."""
     self.matrix = ajtable
-
   def Distance(self, from_node, to_node):
     return self.matrix[from_node][to_node]
 
@@ -70,7 +70,6 @@ def main():
     # Nodes are indexed from 0 to parser_tsp_size - 1, by default the start of
     # the route is node 0.
     routing = pywrapcp.RoutingModel(size, 1)
-
     search_parameters = pywrapcp.RoutingModel.DefaultSearchParameters()
     # Setting first solution heuristic (cheapest addition).
     search_parameters.first_solution_strategy = (
@@ -81,8 +80,9 @@ def main():
     # arguments (the from and to node inidices) and returns the distance between
     # these nodes.
 
-    matrix = AdjacentMatrix(size, ajtable)
-    print 'matrix', matrix.matrix
+    matrix = AdjacentMatrix(size, ajtable) # if we don't use full size adjacent matrix, it will select some nodes which don't connect at all
+    print 'matrix', matrix.matrix #visualize the dictionary for debug
+    
     matrix_callback = matrix.Distance
     if matrix_callback :
       routing.SetArcCostEvaluatorOfAllVehicles(matrix_callback)
@@ -104,9 +104,9 @@ def main():
       route += '0'
       print 'travel route: ', route
     else:
-      print('No solution found.')
+      print 'No solution found.'
   else:
-    print('Specify an instance greater than 0.')
+    print 'Specify an instance greater than 0.'
 
 if __name__ == '__main__':
     main()
